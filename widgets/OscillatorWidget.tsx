@@ -33,8 +33,11 @@ export default function OscillatorWidget({
   showValueSelector = true,
 }: OscillatorWidgetProps) {
   const [tune, setTune] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const [offsetIndex, setOffsetIndex] = useState(
+    OFFSET_VALUES_SMALL.indexOf(0),
+  );
   const [offsetVisible, setOffsetVisible] = useState(true);
+  const offset = OFFSET_VALUES_SMALL[offsetIndex] ?? 0;
 
   const emit = (nextTune: number, nextOffset: number) => {
     onChange?.(nextTune + nextOffset);
@@ -83,9 +86,9 @@ export default function OscillatorWidget({
             <View className="w-full">
               <ValueSelector
                 values={OFFSET_VALUES_SMALL}
-                value={offset}
-                onChange={(nextOffset) => {
-                  setOffset(nextOffset);
+                selectedIndex={offsetIndex}
+                onChange={(nextOffset, index) => {
+                  setOffsetIndex(index);
                   emit(tune, nextOffset);
                 }}
               />
