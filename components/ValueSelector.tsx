@@ -8,9 +8,9 @@ type ValueSelectorProps<T extends string | number> = {
 };
 
 function defaultFormat(value: string | number) {
-  if (typeof value === "number" && value > 0) {
-    return `+${value}`;
-  }
+  // if (typeof value === "number" && value > 0) {
+  //   return `+${value}`;
+  // }
 
   return String(value);
 }

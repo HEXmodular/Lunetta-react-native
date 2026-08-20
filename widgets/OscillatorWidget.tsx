@@ -6,6 +6,7 @@ import { Pressable, Text, View } from "react-native";
 
 const A4_HZ = 440;
 const OFFSET_VALUES = [-36, -24, -12, 0, 12, 24, 36] as const;
+const OFFSET_VALUES_SMALL = [3, 2, 1, 0, 1, 2, 3] as const;
 const SLIDER_MIN = -36;
 const SLIDER_MAX = 36;
 
@@ -24,9 +25,13 @@ function formatSemitones(semitones: number) {
 
 type OscillatorWidgetProps = {
   onChange?: (semitones: number) => void;
+  showValueSelector?: boolean;
 };
 
-export default function OscillatorWidget({ onChange }: OscillatorWidgetProps) {
+export default function OscillatorWidget({
+  onChange,
+  showValueSelector = true,
+}: OscillatorWidgetProps) {
   const [tune, setTune] = useState(0);
   const [offset, setOffset] = useState(0);
   const [offsetVisible, setOffsetVisible] = useState(true);
@@ -39,11 +44,12 @@ export default function OscillatorWidget({ onChange }: OscillatorWidgetProps) {
   const hz = semitonesToHz(semitones);
 
   return (
-    <View className="w-full items-center rounded-2xl border border-border px-3 py-4">
-      <Text className="mb-2 font-sans-semibold text-base text-primary">
+    <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
+      <Text className="mb-1 font-sans-semibold text-sm text-primary">
         Oscillator
       </Text>
       <CircularSlider
+        size={140}
         min={SLIDER_MIN}
         max={SLIDER_MAX}
         value={tune}
@@ -53,33 +59,39 @@ export default function OscillatorWidget({ onChange }: OscillatorWidgetProps) {
         }}
         formatValue={() => String(Math.round(hz))}
       />
-      <Pressable
-        onPress={() => setOffsetVisible((visible) => !visible)}
-        className="mt-2 flex-row items-center gap-1 py-2"
-      >
-        <Text className="font-sans-medium text-sm text-primary/50">Octave</Text>
-        {offset !== 0 ? (
-          <Text className="font-sans-medium text-sm text-accent">
-            {formatSemitones(offset)}
-          </Text>
-        ) : null}
-        <Ionicons
-          name={offsetVisible ? "chevron-up" : "chevron-down"}
-          size={16}
-          color="#08112666"
-        />
-      </Pressable>
-      {offsetVisible ? (
-        <View className="w-full">
-          <ValueSelector
-            values={OFFSET_VALUES}
-            value={offset}
-            onChange={(nextOffset) => {
-              setOffset(nextOffset);
-              emit(tune, nextOffset);
-            }}
-          />
-        </View>
+      {showValueSelector ? (
+        <>
+          <Pressable
+            onPress={() => setOffsetVisible((visible) => !visible)}
+            className="mt-2 flex-row items-center gap-1 py-2"
+          >
+            <Text className="font-sans-medium text-sm text-primary/50">
+              Octave
+            </Text>
+            {offset !== 0 ? (
+              <Text className="font-sans-medium text-sm text-accent">
+                {formatSemitones(offset)}
+              </Text>
+            ) : null}
+            <Ionicons
+              name={offsetVisible ? "chevron-up" : "chevron-down"}
+              size={16}
+              color="#08112666"
+            />
+          </Pressable>
+          {offsetVisible ? (
+            <View className="w-full">
+              <ValueSelector
+                values={OFFSET_VALUES_SMALL}
+                value={offset}
+                onChange={(nextOffset) => {
+                  setOffset(nextOffset);
+                  emit(tune, nextOffset);
+                }}
+              />
+            </View>
+          ) : null}
+        </>
       ) : null}
       <Text className="mt-2 font-sans-medium text-xs text-primary/40">
         {formatSemitones(semitones)} st from 440 Hz

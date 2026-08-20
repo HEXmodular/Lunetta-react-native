@@ -45,7 +45,7 @@ export default function Index() {
   const frequencyRef = useRef(DEFAULT_FREQ);
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6">
+    <View className="flex-1 items-center justify-center bg-white px-4">
       <View
         className="absolute h-px w-px overflow-hidden opacity-0"
         pointerEvents="none"
@@ -61,13 +61,16 @@ export default function Index() {
           }
         />
       </View>
-      <OscillatorWidget
-        onChange={(semitones) => {
-          const hz = semitonesToHz(semitones);
-          frequencyRef.current = hz;
-          injectFrequency(webViewRef.current, hz);
-        }}
-      />
+      <View className="w-full flex-row items-start gap-3">
+        <OscillatorWidget showValueSelector={false} />
+        <OscillatorWidget
+          onChange={(semitones) => {
+            const hz = semitonesToHz(semitones);
+            frequencyRef.current = hz;
+            injectFrequency(webViewRef.current, hz);
+          }}
+        />
+      </View>
     </View>
   );
 }
