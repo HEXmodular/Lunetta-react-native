@@ -31,11 +31,15 @@ function describeArc(startDeg: number, endDeg: number) {
   return `M ${start.x} ${start.y} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${end.x} ${end.y}`;
 }
 
-function frequencyToProgress(hz: number, min: number, max: number) {
-  return (hz - min) / (max - min);
+function valueToProgress(value: number, min: number, max: number) {
+  if (max === min) {
+    return 0;
+  }
+
+  return (value - min) / (max - min);
 }
 
-function angleToFrequency(angleRad: number, min: number, max: number) {
+function angleToValue(angleRad: number, min: number, max: number) {
   let deg = (angleRad * 180) / Math.PI;
   if (deg < 0) deg += 360;
 
@@ -47,14 +51,17 @@ function angleToFrequency(angleRad: number, min: number, max: number) {
   }
 
   const t = relative / SWEEP;
-  return Math.round(min + t * (max - min));
+  return Math.round((min + t * (max - min)) * 100) / 100;
 }
 
 type CircularSliderProps = {
   value: number;
   min: number;
   max: number;
-  onChange: (hz: number) => void;
+  onChange: (value: number) => void;
+  label?: string;
+  unit?: string;
+  formatValue?: (value: number) => string;
 };
 
 export default function CircularSlider({
@@ -62,6 +69,9 @@ export default function CircularSlider({
   min,
   max,
   onChange,
+  label = "Frequency",
+  unit = "Hz",
+  formatValue = (next) => String(Math.round(next)),
 }: CircularSliderProps) {
   const onChangeRef = useRef(onChange);
   const minRef = useRef(min);
@@ -71,12 +81,12 @@ export default function CircularSlider({
   maxRef.current = max;
 
   const updateFromTouch = useCallback((x: number, y: number) => {
-    const hz = angleToFrequency(
+    const next = angleToValue(
       Math.atan2(y - CENTER, x - CENTER),
       minRef.current,
       maxRef.current,
     );
-    onChangeRef.current(hz);
+    onChangeRef.current(next);
   }, []);
 
   const gesture = useMemo(
@@ -92,7 +102,7 @@ export default function CircularSlider({
     [updateFromTouch],
   );
 
-  const progress = frequencyToProgress(value, min, max);
+  const progress = valueToProgress(value, min, max);
   const endAngle = START_ANGLE + SWEEP * progress;
   const thumb = polar(endAngle);
 
@@ -102,29 +112,33 @@ export default function CircularSlider({
         <Svg width={SIZE} height={SIZE}>
           <Path
             d={describeArc(START_ANGLE, START_ANGLE + SWEEP)}
-            stroke="#cbd5e1"
+            stroke="#0811261a"
             strokeWidth={STROKE}
             fill="none"
             strokeLinecap="round"
           />
           <Path
             d={describeArc(START_ANGLE, Math.max(endAngle, START_ANGLE + 0.01))}
-            stroke="#3b82f6"
+            stroke="#ea7a53"
             strokeWidth={STROKE}
             fill="none"
             strokeLinecap="round"
           />
-          <Circle cx={thumb.x} cy={thumb.y} r={THUMB} fill="#3b82f6" />
+          <Circle cx={thumb.x} cy={thumb.y} r={THUMB} fill="#ea7a53" />
         </Svg>
         <View
           className="absolute inset-0 items-center justify-center"
           pointerEvents="none"
         >
-          <Text className="text-sm text-slate-500">Frequency</Text>
-          <Text className="text-4xl font-bold text-slate-900">
-            {Math.round(value)}
+          <Text className="font-sans-medium text-sm text-primary/40">
+            {label}
           </Text>
-          <Text className="text-sm text-slate-400">Hz</Text>
+          <Text className="font-sans-bold text-4xl text-primary">
+            {formatValue(value)}
+          </Text>
+          <Text className="font-sans-medium text-sm text-primary/40">
+            {unit}
+          </Text>
         </View>
       </View>
     </GestureDetector>
