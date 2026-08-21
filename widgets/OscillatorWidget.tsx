@@ -5,8 +5,7 @@ import { Text, View } from "react-native";
 
 const A4_HZ = 440;
 const A4_MIDI = 69;
-const OFFSET_VALUES = [-36, -24, -12, 0, 12, 24, 36] as const;
-const OFFSET_VALUES_SMALL = [3, 2, 1, 0, 1, 2, 3] as const;
+const OFFSET_OCTAVES = [-3, -2, -1, 0, 1, 2, 3] as const;
 const SLIDER_MIN = -36;
 const SLIDER_MAX = 36;
 const NOTE_NAMES = [
@@ -62,11 +61,9 @@ export default function OscillatorWidget({
   showValueSelector = true,
 }: OscillatorWidgetProps) {
   const [tune, setTune] = useState(0);
-  const [offsetIndex, setOffsetIndex] = useState(
-    OFFSET_VALUES_SMALL.indexOf(0),
-  );
+  const [offsetIndex, setOffsetIndex] = useState(OFFSET_OCTAVES.indexOf(0));
   const [displayMode, setDisplayMode] = useState<DisplayMode>("st");
-  const offset = OFFSET_VALUES_SMALL[offsetIndex] ?? 0;
+  const offset = (OFFSET_OCTAVES[offsetIndex] ?? 0) * 12;
 
   const emit = (nextTune: number, nextOffset: number) => {
     onChange?.(nextTune + nextOffset);
@@ -80,20 +77,17 @@ export default function OscillatorWidget({
           label: "Frequency",
           unit: "Hz",
           value: String(Math.round(hz)),
-          footer: `${formatSemitones(semitones)} st from 440 Hz`,
         }
       : displayMode === "note"
         ? {
             label: "Note",
             unit: "",
             value: semitonesToNoteName(semitones),
-            footer: `${Math.round(hz)} Hz`,
           }
         : {
             label: "Tune",
             unit: "st",
             value: formatSemitones(semitones),
-            footer: `${Math.round(hz)} Hz`,
           };
 
   return (
@@ -126,29 +120,21 @@ export default function OscillatorWidget({
       />
       {showValueSelector ? (
         <>
-          <Text className="font-sans-medium text-sm text-primary/50">
-            Octave
+          <Text className="font-sans-medium text-xs text-primary/50">
+            octave
           </Text>
-          {offset !== 0 ? (
-            <Text className="font-sans-medium text-sm text-accent">
-              {formatSemitones(offset)}
-            </Text>
-          ) : null}
           <View className="w-full">
             <ValueSelector
-              values={OFFSET_VALUES_SMALL}
+              values={OFFSET_OCTAVES}
               selectedIndex={offsetIndex}
-              onChange={(nextOffset, index) => {
+              onChange={(nextOctave, index) => {
                 setOffsetIndex(index);
-                emit(tune, nextOffset);
+                emit(tune, nextOctave * 12);
               }}
             />
           </View>
         </>
       ) : null}
-      <Text className="mt-2 font-sans-medium text-xs text-primary/40">
-        {display.footer}
-      </Text>
     </View>
   );
 }

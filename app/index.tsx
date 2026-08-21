@@ -62,7 +62,7 @@ export default function Index() {
         />
       </View>
       <View className="w-full flex-row items-start gap-3">
-        <OscillatorWidget showValueSelector={false} />
+        <OscillatorWidget />
         <OscillatorWidget
           onChange={(semitones) => {
             const hz = semitonesToHz(semitones);
