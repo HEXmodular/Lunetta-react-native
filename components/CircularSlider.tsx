@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import { runOnJS } from "react-native-worklets";
 import Svg, { Circle, Path } from "react-native-svg";
 
 const DEFAULT_SIZE = 280;
