@@ -52,11 +52,13 @@ function nextDisplayMode(mode: DisplayMode): DisplayMode {
 }
 
 type OscillatorWidgetProps = {
+  title?: string;
   onChange?: (semitones: number) => void;
   showValueSelector?: boolean;
 };
 
 export default function OscillatorWidget({
+  title = "Oscillator",
   onChange,
   showValueSelector = true,
 }: OscillatorWidgetProps) {
@@ -93,7 +95,7 @@ export default function OscillatorWidget({
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
       <Text className="mb-1 font-sans-semibold text-sm text-primary">
-        Oscillator
+        {title}
       </Text>
       <CircularSlider
         size={140}

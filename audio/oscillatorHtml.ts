@@ -1,4 +1,4 @@
-export function createOscillatorHtml(defaultFreq: number) {
+export function createOscillatorHtml(defaultFreq: number, defaultLfoRate = 1) {
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -8,19 +8,35 @@ export function createOscillatorHtml(defaultFreq: number) {
     <script>
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       const audioCtx = new AudioCtx();
-      const osc1 = audioCtx.createOscillator();
-      const osc2 = audioCtx.createOscillator();
-      const oscillators = [osc1, osc2];
+      const OSC_COUNT = 4;
+      const INPUT_COUNT = 5;
+      const oscillators = [];
       const outputGain = audioCtx.createGain();
+      const lfo = audioCtx.createOscillator();
 
-      function xor(a, b) {
-        return ((a >= 0 ? 1 : 0) ^ (b >= 0 ? 1 : 0)) ? 1 : -1;
+      function xorBits(bits) {
+        var bit = 0;
+        for (var n = 0; n < bits.length; n++) {
+          bit ^= bits[n] >= 0 ? 1 : 0;
+        }
+        return bit ? 1 : -1;
       }
 
-      osc1.type = "square";
-      osc2.type = "square";
-      osc1.frequency.value = ${defaultFreq};
-      osc2.frequency.value = ${defaultFreq};
+      function mixSample(osc1, osc2, osc3, osc4, lfoSample) {
+        var selected = lfoSample < 0 ? osc3 : osc4;
+        return xorBits([osc1, osc2, selected]);
+      }
+
+      for (var i = 0; i < OSC_COUNT; i++) {
+        var osc = audioCtx.createOscillator();
+        osc.type = "square";
+        osc.frequency.value = ${defaultFreq};
+        oscillators.push(osc);
+      }
+
+      lfo.type = "square";
+      lfo.frequency.value = ${defaultLfoRate};
+
       outputGain.gain.value = 0.2;
       outputGain.connect(audioCtx.destination);
 
@@ -29,47 +45,80 @@ export function createOscillatorHtml(defaultFreq: number) {
         audioCtx.resume();
       };
 
+      window.setLfoRate = function (hz) {
+        lfo.frequency.setValueAtTime(hz, audioCtx.currentTime);
+        audioCtx.resume();
+      };
+
       function startOscillators() {
-        osc1.start();
-        osc2.start();
+        for (var i = 0; i < OSC_COUNT; i++) {
+          oscillators[i].start();
+        }
+        lfo.start();
         audioCtx.resume();
       }
 
+      function connectSources(node) {
+        for (var i = 0; i < OSC_COUNT; i++) {
+          oscillators[i].connect(node, 0, i);
+        }
+        lfo.connect(node, 0, OSC_COUNT);
+      }
+
       function connectScriptProcessorXor() {
-        const merger = audioCtx.createChannelMerger(2);
-        const xorNode = audioCtx.createScriptProcessor(1024, 2, 1);
-        xorNode.channelCount = 2;
+        const merger = audioCtx.createChannelMerger(INPUT_COUNT);
+        const xorNode = audioCtx.createScriptProcessor(1024, INPUT_COUNT, 1);
+        xorNode.channelCount = INPUT_COUNT;
         xorNode.channelCountMode = "explicit";
         xorNode.channelInterpretation = "discrete";
-        osc1.connect(merger, 0, 0);
-        osc2.connect(merger, 0, 1);
+        connectSources(merger);
         merger.connect(xorNode);
         xorNode.connect(outputGain);
         xorNode.onaudioprocess = function (event) {
           const input = event.inputBuffer;
-          const a = input.getChannelData(0);
-          const b =
-            input.numberOfChannels > 1 ? input.getChannelData(1) : a;
           const out = event.outputBuffer.getChannelData(0);
-          for (let i = 0; i < out.length; i++) {
-            out[i] = xor(a[i], b[i]);
+          const channels = [];
+          for (var n = 0; n < INPUT_COUNT; n++) {
+            channels.push(
+              input.numberOfChannels > n ? input.getChannelData(n) : channels[0],
+            );
+          }
+          for (var i = 0; i < out.length; i++) {
+            out[i] = mixSample(
+              channels[0][i],
+              channels[1][i],
+              channels[2][i],
+              channels[3][i],
+              channels[4][i],
+            );
           }
         };
         startOscillators();
       }
 
       const workletCode =
-        "function xor(a, b) {" +
-        "  return ((a >= 0 ? 1 : 0) ^ (b >= 0 ? 1 : 0)) ? 1 : -1;" +
+        "function xorBits(bits) {" +
+        "  var bit = 0;" +
+        "  for (var n = 0; n < bits.length; n++) {" +
+        "    bit ^= bits[n] >= 0 ? 1 : 0;" +
+        "  }" +
+        "  return bit ? 1 : -1;" +
+        "}" +
+        "function mixSample(osc1, osc2, osc3, osc4, lfoSample) {" +
+        "  var selected = lfoSample < 0 ? osc3 : osc4;" +
+        "  return xorBits([osc1, osc2, selected]);" +
         "}" +
         "class XorProcessor extends AudioWorkletProcessor {" +
         "  process(inputs, outputs) {" +
-        "    var aIn = inputs[0] && inputs[0][0];" +
-        "    var bIn = inputs[1] && inputs[1][0];" +
+        "    var osc1 = inputs[0] && inputs[0][0];" +
+        "    var osc2 = inputs[1] && inputs[1][0];" +
+        "    var osc3 = inputs[2] && inputs[2][0];" +
+        "    var osc4 = inputs[3] && inputs[3][0];" +
+        "    var lfoIn = inputs[4] && inputs[4][0];" +
         "    var out = outputs[0] && outputs[0][0];" +
-        "    if (!aIn || !bIn || !out) return true;" +
+        "    if (!osc1 || !osc2 || !osc3 || !osc4 || !lfoIn || !out) return true;" +
         "    for (var i = 0; i < out.length; i++) {" +
-        "      out[i] = xor(aIn[i], bIn[i]);" +
+        "      out[i] = mixSample(osc1[i], osc2[i], osc3[i], osc4[i], lfoIn[i]);" +
         "    }" +
         "    return true;" +
         "  }" +
@@ -84,12 +133,11 @@ export function createOscillatorHtml(defaultFreq: number) {
           .addModule(url)
           .then(function () {
             const xorNode = new AudioWorkletNode(audioCtx, "xor-processor", {
-              numberOfInputs: 2,
+              numberOfInputs: INPUT_COUNT,
               numberOfOutputs: 1,
               outputChannelCount: [1],
             });
-            osc1.connect(xorNode, 0, 0);
-            osc2.connect(xorNode, 0, 1);
+            connectSources(xorNode);
             xorNode.connect(outputGain);
             startOscillators();
           })
