@@ -111,6 +111,15 @@ export default function OscillatorWidget({
           emit(nextTune, offset);
         }}
         onPress={() => setDisplayMode(nextDisplayMode)}
+        onLongPress={
+          displayMode === "st"
+            ? () => {
+                const nextTune = Math.round(tune);
+                setTune(nextTune);
+                emit(nextTune, offset);
+              }
+            : undefined
+        }
         label={display.label}
         unit={display.unit}
         formatValue={() => display.value}
