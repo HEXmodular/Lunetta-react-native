@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-worklets";
+import { scheduleOnRN } from "react-native-worklets";
 import Svg, { Circle, Path } from "react-native-svg";
 
 const DEFAULT_SIZE = 280;
@@ -109,10 +109,10 @@ export default function CircularSlider({
       Gesture.Pan()
         .minDistance(0)
         .onBegin((event) => {
-          runOnJS(updateFromTouch)(event.x, event.y);
+          scheduleOnRN(updateFromTouch, event.x, event.y);
         })
         .onChange((event) => {
-          runOnJS(updateFromTouch)(event.x, event.y);
+          scheduleOnRN(updateFromTouch, event.x, event.y);
         }),
     [updateFromTouch],
   );
