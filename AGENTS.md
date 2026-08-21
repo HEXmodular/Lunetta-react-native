@@ -4,3 +4,4 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v54.0.0/ before 
 
 Для стилей используй Taillwind
 Новые компоненты нужно создавать в своих собственных отдельных файлах
+Не добавляй функционал о котором тебя не просили

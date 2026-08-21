@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from "react";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import Svg, { Circle, Path } from "react-native-svg";
@@ -60,6 +60,8 @@ type CircularSliderProps = {
   min: number;
   max: number;
   onChange: (value: number) => void;
+  onPress?: () => void;
+  onLongPress?: () => void;
   label?: string;
   unit?: string;
   formatValue?: (value: number) => string;
@@ -71,6 +73,8 @@ export default function CircularSlider({
   min,
   max,
   onChange,
+  onPress,
+  onLongPress,
   label = "Frequency",
   unit = "Hz",
   formatValue = (next) => String(Math.round(next)),
@@ -118,46 +122,58 @@ export default function CircularSlider({
   const thumbPoint = polar(endAngle, center, radius);
 
   return (
-    <GestureDetector gesture={gesture}>
-      <View style={{ width: size, height: size }}>
-        <Svg width={size} height={size}>
-          <Path
-            d={describeArc(START_ANGLE, START_ANGLE + SWEEP, center, radius)}
-            stroke="#0811261a"
-            strokeWidth={stroke}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Path
-            d={describeArc(
-              START_ANGLE,
-              Math.max(endAngle, START_ANGLE + 0.01),
-              center,
-              radius,
-            )}
-            stroke="#ea7a53"
-            strokeWidth={stroke}
-            fill="none"
-            strokeLinecap="round"
-          />
-          <Circle
-            cx={thumbPoint.x}
-            cy={thumbPoint.y}
-            r={thumb}
-            fill="#ea7a53"
-          />
-        </Svg>
-        <View
-          className="absolute inset-0 items-center justify-center"
-          pointerEvents="none"
+    <View style={{ width: size, height: size }}>
+      <GestureDetector gesture={gesture}>
+        <View style={{ width: size, height: size }}>
+          <Svg width={size} height={size}>
+            <Path
+              d={describeArc(START_ANGLE, START_ANGLE + SWEEP, center, radius)}
+              stroke="#0811261a"
+              strokeWidth={stroke}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <Path
+              d={describeArc(
+                START_ANGLE,
+                Math.max(endAngle, START_ANGLE + 0.01),
+                center,
+                radius,
+              )}
+              stroke="#ea7a53"
+              strokeWidth={stroke}
+              fill="none"
+              strokeLinecap="round"
+            />
+            <Circle
+              cx={thumbPoint.x}
+              cy={thumbPoint.y}
+              r={thumb}
+              fill="#ea7a53"
+            />
+          </Svg>
+        </View>
+      </GestureDetector>
+      <View
+        className="absolute inset-0 items-center justify-center"
+        pointerEvents={onPress || onLongPress ? "box-none" : "none"}
+      >
+        <Pressable
+          onPress={onPress}
+          onLongPress={onLongPress}
+          delayLongPress={400}
+          disabled={!onPress && !onLongPress}
+          className="items-center"
         >
-          <Text
-            className={`font-sans-medium text-primary/40 ${
-              compact ? "text-xs" : "text-sm"
-            }`}
-          >
-            {label}
-          </Text>
+          {label ? (
+            <Text
+              className={`font-sans-medium text-primary/40 ${
+                compact ? "text-xs" : "text-sm"
+              }`}
+            >
+              {label}
+            </Text>
+          ) : null}
           <Text
             className={`font-sans-bold text-primary ${
               compact ? "text-xl" : "text-4xl"
@@ -165,15 +181,17 @@ export default function CircularSlider({
           >
             {formatValue(value)}
           </Text>
-          <Text
-            className={`font-sans-medium text-primary/40 ${
-              compact ? "text-xs" : "text-sm"
-            }`}
-          >
-            {unit}
-          </Text>
-        </View>
+          {unit ? (
+            <Text
+              className={`font-sans-medium text-primary/40 ${
+                compact ? "text-xs" : "text-sm"
+              }`}
+            >
+              {unit}
+            </Text>
+          ) : null}
+        </Pressable>
       </View>
-    </GestureDetector>
+    </View>
   );
 }

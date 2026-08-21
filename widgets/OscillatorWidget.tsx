@@ -1,14 +1,31 @@
 import CircularSlider from "@/components/CircularSlider";
 import ValueSelector from "@/components/ValueSelector";
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 const A4_HZ = 440;
+const A4_MIDI = 69;
 const OFFSET_VALUES = [-36, -24, -12, 0, 12, 24, 36] as const;
 const OFFSET_VALUES_SMALL = [3, 2, 1, 0, 1, 2, 3] as const;
 const SLIDER_MIN = -36;
 const SLIDER_MAX = 36;
+const NOTE_NAMES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+] as const;
+const DISPLAY_CYCLE = ["st", "hz", "note"] as const;
+
+type DisplayMode = (typeof DISPLAY_CYCLE)[number];
 
 export function semitonesToHz(semitones: number) {
   return A4_HZ * 2 ** (semitones / 12);
@@ -21,6 +38,18 @@ function formatSemitones(semitones: number) {
   }
 
   return String(rounded);
+}
+
+function semitonesToNoteName(semitones: number) {
+  const midi = A4_MIDI + Math.round(semitones);
+  const name = NOTE_NAMES[((midi % 12) + 12) % 12];
+  const octave = Math.floor(midi / 12) - 1;
+
+  return `${name}${octave}`;
+}
+
+function nextDisplayMode(mode: DisplayMode): DisplayMode {
+  return DISPLAY_CYCLE[(DISPLAY_CYCLE.indexOf(mode) + 1) % DISPLAY_CYCLE.length];
 }
 
 type OscillatorWidgetProps = {
@@ -36,7 +65,7 @@ export default function OscillatorWidget({
   const [offsetIndex, setOffsetIndex] = useState(
     OFFSET_VALUES_SMALL.indexOf(0),
   );
-  const [offsetVisible, setOffsetVisible] = useState(true);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("st");
   const offset = OFFSET_VALUES_SMALL[offsetIndex] ?? 0;
 
   const emit = (nextTune: number, nextOffset: number) => {
@@ -45,6 +74,27 @@ export default function OscillatorWidget({
 
   const semitones = tune + offset;
   const hz = semitonesToHz(semitones);
+  const display =
+    displayMode === "hz"
+      ? {
+          label: "Frequency",
+          unit: "Hz",
+          value: String(Math.round(hz)),
+          footer: `${formatSemitones(semitones)} st from 440 Hz`,
+        }
+      : displayMode === "note"
+        ? {
+            label: "Note",
+            unit: "",
+            value: semitonesToNoteName(semitones),
+            footer: `${Math.round(hz)} Hz`,
+          }
+        : {
+            label: "Tune",
+            unit: "st",
+            value: formatSemitones(semitones),
+            footer: `${Math.round(hz)} Hz`,
+          };
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
@@ -60,44 +110,35 @@ export default function OscillatorWidget({
           setTune(nextTune);
           emit(nextTune, offset);
         }}
-        formatValue={() => String(Math.round(hz))}
+        onPress={() => setDisplayMode(nextDisplayMode)}
+        label={display.label}
+        unit={display.unit}
+        formatValue={() => display.value}
       />
       {showValueSelector ? (
         <>
-          <Pressable
-            onPress={() => setOffsetVisible((visible) => !visible)}
-            className="mt-2 flex-row items-center gap-1 py-2"
-          >
-            <Text className="font-sans-medium text-sm text-primary/50">
-              Octave
+          <Text className="font-sans-medium text-sm text-primary/50">
+            Octave
+          </Text>
+          {offset !== 0 ? (
+            <Text className="font-sans-medium text-sm text-accent">
+              {formatSemitones(offset)}
             </Text>
-            {offset !== 0 ? (
-              <Text className="font-sans-medium text-sm text-accent">
-                {formatSemitones(offset)}
-              </Text>
-            ) : null}
-            <Ionicons
-              name={offsetVisible ? "chevron-up" : "chevron-down"}
-              size={16}
-              color="#08112666"
-            />
-          </Pressable>
-          {offsetVisible ? (
-            <View className="w-full">
-              <ValueSelector
-                values={OFFSET_VALUES_SMALL}
-                selectedIndex={offsetIndex}
-                onChange={(nextOffset, index) => {
-                  setOffsetIndex(index);
-                  emit(tune, nextOffset);
-                }}
-              />
-            </View>
           ) : null}
+          <View className="w-full">
+            <ValueSelector
+              values={OFFSET_VALUES_SMALL}
+              selectedIndex={offsetIndex}
+              onChange={(nextOffset, index) => {
+                setOffsetIndex(index);
+                emit(tune, nextOffset);
+              }}
+            />
+          </View>
         </>
       ) : null}
       <Text className="mt-2 font-sans-medium text-xs text-primary/40">
-        {formatSemitones(semitones)} st from 440 Hz
+        {display.footer}
       </Text>
     </View>
   );
