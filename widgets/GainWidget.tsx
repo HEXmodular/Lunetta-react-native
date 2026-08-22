@@ -15,7 +15,11 @@ function formatDb(value: number) {
   return String(rounded);
 }
 
-export default function GainWidget() {
+type GainWidgetProps = {
+  onChange?: (db: number) => void;
+};
+
+export default function GainWidget({ onChange }: GainWidgetProps) {
   const [gain, setGain] = useState(DEFAULT_GAIN);
 
   return (
@@ -26,7 +30,10 @@ export default function GainWidget() {
         min={SLIDER_MIN}
         max={SLIDER_MAX}
         value={gain}
-        onChange={setGain}
+        onChange={(nextGain) => {
+          setGain(nextGain);
+          onChange?.(nextGain);
+        }}
         label="Gain"
         unit="dB"
         formatValue={formatDb}

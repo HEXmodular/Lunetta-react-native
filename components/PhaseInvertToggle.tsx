@@ -7,7 +7,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export default function PhaseInvertToggle() {
+type PhaseInvertToggleProps = {
+  onChange?: (inverted: boolean) => void;
+};
+
+export default function PhaseInvertToggle({ onChange }: PhaseInvertToggleProps) {
   const [inverted, setInverted] = useState(false);
   const rotation = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -23,6 +27,7 @@ export default function PhaseInvertToggle() {
         const next = !inverted;
         setInverted(next);
         rotation.value = withTiming(next ? 180 : 0, { duration: 280 });
+        onChange?.(next);
       }}
       accessibilityRole="button"
       accessibilityLabel="Invert phase"

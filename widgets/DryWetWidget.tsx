@@ -6,7 +6,11 @@ const SLIDER_MIN = 0;
 const SLIDER_MAX = 100;
 const DEFAULT_MIX = 50;
 
-export default function DryWetWidget() {
+type DryWetWidgetProps = {
+  onChange?: (percent: number) => void;
+};
+
+export default function DryWetWidget({ onChange }: DryWetWidgetProps) {
   const [mix, setMix] = useState(DEFAULT_MIX);
 
   return (
@@ -19,7 +23,10 @@ export default function DryWetWidget() {
         min={SLIDER_MIN}
         max={SLIDER_MAX}
         value={mix}
-        onChange={setMix}
+        onChange={(nextMix) => {
+          setMix(nextMix);
+          onChange?.(nextMix);
+        }}
         label="Mix"
         unit="%"
         formatValue={(value) => String(Math.round(value))}

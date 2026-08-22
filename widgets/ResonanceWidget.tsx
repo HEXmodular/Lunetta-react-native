@@ -6,7 +6,11 @@ const SLIDER_MIN = 0;
 const SLIDER_MAX = 100;
 const DEFAULT_RESONANCE = 0;
 
-export default function ResonanceWidget() {
+type ResonanceWidgetProps = {
+  onChange?: (percent: number) => void;
+};
+
+export default function ResonanceWidget({ onChange }: ResonanceWidgetProps) {
   const [resonance, setResonance] = useState(DEFAULT_RESONANCE);
 
   return (
@@ -19,7 +23,10 @@ export default function ResonanceWidget() {
         min={SLIDER_MIN}
         max={SLIDER_MAX}
         value={resonance}
-        onChange={setResonance}
+        onChange={(nextResonance) => {
+          setResonance(nextResonance);
+          onChange?.(nextResonance);
+        }}
         label="Resonance"
         unit="%"
         formatValue={(value) => String(Math.round(value))}

@@ -1,11 +1,5 @@
-export function createOscillatorHtml(defaultFreq: number, defaultLfoRate = 1) {
-  return `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-  </head>
-  <body>
-    <script>
+export function createOscillatorScript(defaultFreq: number, defaultLfoRate = 1) {
+  return `
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       const audioCtx = new AudioCtx();
       const OSC_COUNT = 4;
@@ -37,8 +31,7 @@ export function createOscillatorHtml(defaultFreq: number, defaultLfoRate = 1) {
       lfo.type = "square";
       lfo.frequency.value = ${defaultLfoRate};
 
-      outputGain.gain.value = 0.2;
-      outputGain.connect(audioCtx.destination);
+      outputGain.gain.value = 1;
 
       window.setFrequency = function (index, hz) {
         oscillators[index].frequency.setValueAtTime(hz, audioCtx.currentTime);
@@ -147,7 +140,5 @@ export function createOscillatorHtml(defaultFreq: number, defaultLfoRate = 1) {
       } else {
         connectScriptProcessorXor();
       }
-    </script>
-  </body>
-</html>`;
+`;
 }

@@ -15,7 +15,11 @@ function formatDelay(ms: number) {
   return Number.isInteger(seconds) ? String(seconds) : seconds.toFixed(2);
 }
 
-export default function DelayWidget() {
+type DelayWidgetProps = {
+  onChange?: (ms: number) => void;
+};
+
+export default function DelayWidget({ onChange }: DelayWidgetProps) {
   const [delayMs, setDelayMs] = useState(DEFAULT_DELAY_MS);
 
   return (
@@ -26,7 +30,10 @@ export default function DelayWidget() {
         min={SLIDER_MIN}
         max={SLIDER_MAX}
         value={delayMs}
-        onChange={setDelayMs}
+        onChange={(nextDelayMs) => {
+          setDelayMs(nextDelayMs);
+          onChange?.(nextDelayMs);
+        }}
         label="Time"
         unit={delayMs < 1000 ? "ms" : "s"}
         formatValue={formatDelay}
