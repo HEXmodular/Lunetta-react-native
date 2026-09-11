@@ -23,24 +23,39 @@ function createReverbScript(defaultFreq: number) {
       function createReverbChain() {
         var gain = audioCtx.createGain();
         var filter = audioCtx.createBiquadFilter();
-        var delay = audioCtx.createDelay(MAX_DELAY);
         var clipper = createHardClipper();
+        var delayGain = audioCtx.createGain();
+        var delay = audioCtx.createDelay(MAX_DELAY);
+        var delayClipper = createHardClipper();
         gain.channelCount = 1;
         gain.channelCountMode = "explicit";
         filter.channelCount = 1;
         filter.channelCountMode = "explicit";
+        delayGain.channelCount = 1;
+        delayGain.channelCountMode = "explicit";
         delay.channelCount = 1;
         delay.channelCountMode = "explicit";
         filter.type = "lowpass";
         filter.frequency.value = ${defaultFreq};
         filter.Q.value = 0.707;
         gain.gain.value = 1;
+        delayGain.gain.value = 1;
         delay.delayTime.value = 0;
         gain.connect(filter);
-        filter.connect(delay);
-        delay.connect(clipper);
+        filter.connect(clipper);
         clipper.connect(gain);
-        return { gain: gain, filter: filter, delay: delay, clipper: clipper };
+        clipper.connect(delayGain);
+        delayGain.connect(delay);
+        delay.connect(delayClipper);
+        delayClipper.connect(delay);
+        return {
+          gain: gain,
+          filter: filter,
+          clipper: clipper,
+          delayGain: delayGain,
+          delay: delay,
+          delayClipper: delayClipper,
+        };
       }
 
       const chains = [createReverbChain(), createReverbChain()];
@@ -66,10 +81,10 @@ function createReverbScript(defaultFreq: number) {
       outputGain.connect(chains[0].gain);
       outputGain.connect(chains[1].gain);
 
-      chains[0].clipper.connect(leftKeep);
-      chains[0].clipper.connect(leftCross);
-      chains[1].clipper.connect(rightKeep);
-      chains[1].clipper.connect(rightCross);
+      chains[0].delayClipper.connect(leftKeep);
+      chains[0].delayClipper.connect(leftCross);
+      chains[1].delayClipper.connect(rightKeep);
+      chains[1].delayClipper.connect(rightCross);
       leftKeep.connect(stereoMerger, 0, 0);
       rightCross.connect(stereoMerger, 0, 0);
       rightKeep.connect(stereoMerger, 0, 1);
@@ -81,6 +96,7 @@ function createReverbScript(defaultFreq: number) {
         var linear = dbToGain(chainGainDb[index]);
         if (chainInverted[index]) linear = -linear;
         chains[index].gain.gain.setValueAtTime(linear, audioCtx.currentTime);
+        chains[index].delayGain.gain.setValueAtTime(linear, audioCtx.currentTime);
       }
 
       window.setReverbGain = function (index, db) {

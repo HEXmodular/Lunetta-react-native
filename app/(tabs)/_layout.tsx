@@ -9,9 +9,12 @@ export default function TabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarShowLabel: false,
           tabBarActiveTintColor: "#ea7a53",
           tabBarInactiveTintColor: "#081126",
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: "600",
+          },
           tabBarStyle: {
             backgroundColor: "#ffffff",
             borderTopColor: "rgba(0, 0, 0, 0.1)",
@@ -21,8 +24,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Oscillators",
-            tabBarAccessibilityLabel: "Oscillators",
+            title: "OSC",
+            tabBarAccessibilityLabel: "OSC",
             tabBarIcon: ({ color, size }) => (
               <OscillatorIcon color={color} size={size} />
             ),
@@ -31,8 +34,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="reverb-1"
           options={{
-            title: "Reverb 1",
-            tabBarAccessibilityLabel: "Reverb 1",
+            title: "REVB",
+            tabBarAccessibilityLabel: "REVB",
             tabBarIcon: ({ color, size }) => (
               <ReverbIcon color={color} size={size} />
             ),
@@ -41,8 +44,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="reverb-2"
           options={{
-            title: "Reverb 2",
-            tabBarAccessibilityLabel: "Reverb 2",
+            title: "REVB",
+            tabBarAccessibilityLabel: "REVB",
             tabBarIcon: ({ color, size }) => (
               <ReverbIcon color={color} size={size} />
             ),
