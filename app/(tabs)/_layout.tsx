@@ -1,4 +1,5 @@
 import AudioEngineProvider from "@/audio/AudioEngineProvider";
+import TabBarButton from "@/components/TabBarButton";
 import OscillatorIcon from "@/icons/OscillatorIcon";
 import ReverbIcon from "@/icons/ReverbIcon";
 import { Tabs } from "expo-router";
@@ -11,6 +12,7 @@ export default function TabLayout() {
           headerShown: false,
           tabBarActiveTintColor: "#ea7a53",
           tabBarInactiveTintColor: "#081126",
+          tabBarButton: TabBarButton,
           tabBarLabelStyle: {
             fontSize: 10,
             fontWeight: "600",
