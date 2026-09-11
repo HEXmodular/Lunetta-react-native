@@ -33,16 +33,6 @@ export function createOscillatorScript(defaultFreq: number, defaultLfoRate = 1) 
 
       outputGain.gain.value = 1;
 
-      window.setFrequency = function (index, hz) {
-        oscillators[index].frequency.setValueAtTime(hz, audioCtx.currentTime);
-        audioCtx.resume();
-      };
-
-      window.setLfoRate = function (hz) {
-        lfo.frequency.setValueAtTime(hz, audioCtx.currentTime);
-        audioCtx.resume();
-      };
-
       function startOscillators() {
         for (var i = 0; i < OSC_COUNT; i++) {
           oscillators[i].start();

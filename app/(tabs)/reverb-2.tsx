@@ -1,6 +1,7 @@
 import { useAudioEngine } from "@/audio/AudioEngineProvider";
 import DryWetWidget from "@/widgets/DryWetWidget";
 import ReverbWidget from "@/widgets/ReverbWidget";
+import VolumeWidget from "@/widgets/VolumeWidget";
 import { View } from "react-native";
 
 export default function Reverb2Screen() {
@@ -10,8 +11,9 @@ export default function Reverb2Screen() {
     <View className="flex-1 items-center justify-center bg-white px-4">
       <View className="w-full gap-3">
         <ReverbWidget chainIndex={1} />
-        <View className="w-1/2 self-center">
+        <View className="w-full flex-row items-start gap-3">
           <DryWetWidget onChange={audio.setDryWet} />
+          <VolumeWidget onChange={audio.setMasterVolume} />
         </View>
       </View>
     </View>

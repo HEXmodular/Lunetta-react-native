@@ -12,21 +12,25 @@ import { WebView } from "react-native-webview";
 
 const DEFAULT_FREQ = 440;
 const DEFAULT_LFO_RATE = 1;
+const DEFAULT_OSC_VOLUME = 100;
 const DEFAULT_GAIN_DB = 0;
 const DEFAULT_RESONANCE = 0;
 const DEFAULT_DELAY_MS = 0;
 const DEFAULT_DRY_WET = 50;
+const DEFAULT_MASTER_VOLUME = 100;
 const ENGINE_HTML = createEngineHtml(DEFAULT_FREQ, DEFAULT_LFO_RATE);
 
 type AudioEngineValue = {
   setOscFrequency: (index: number, hz: number) => void;
   setLfoRate: (hz: number) => void;
+  setOscVolume: (percent: number) => void;
   setReverbGain: (chain: number, db: number) => void;
   setReverbPhase: (chain: number, inverted: boolean) => void;
   setReverbFrequency: (chain: number, hz: number) => void;
   setReverbResonance: (chain: number, percent: number) => void;
   setReverbDelay: (chain: number, ms: number) => void;
   setDryWet: (percent: number) => void;
+  setMasterVolume: (percent: number) => void;
 };
 
 const AudioEngineContext = createContext<AudioEngineValue | null>(null);
@@ -55,12 +59,14 @@ export default function AudioEngineProvider({
     DEFAULT_FREQ,
   ]);
   const lfoRateRef = useRef(DEFAULT_LFO_RATE);
+  const oscVolumeRef = useRef(DEFAULT_OSC_VOLUME);
   const gainDbRef = useRef([DEFAULT_GAIN_DB, DEFAULT_GAIN_DB]);
   const invertedRef = useRef([false, false]);
   const reverbFreqRef = useRef([DEFAULT_FREQ, DEFAULT_FREQ]);
   const resonanceRef = useRef([DEFAULT_RESONANCE, DEFAULT_RESONANCE]);
   const delayMsRef = useRef([DEFAULT_DELAY_MS, DEFAULT_DELAY_MS]);
   const dryWetRef = useRef(DEFAULT_DRY_WET);
+  const masterVolumeRef = useRef(DEFAULT_MASTER_VOLUME);
 
   const inject = useCallback((script: string) => {
     webViewRef.current?.injectJavaScript(script);
@@ -77,6 +83,9 @@ export default function AudioEngineProvider({
     });
     webView.injectJavaScript(
       `window.setLfoRate(${lfoRateRef.current}); true;`,
+    );
+    webView.injectJavaScript(
+      `window.setOscVolume(${oscVolumeRef.current}); true;`,
     );
     for (let chain = 0; chain < 2; chain++) {
       webView.injectJavaScript(
@@ -98,6 +107,9 @@ export default function AudioEngineProvider({
     webView.injectJavaScript(
       `window.setDryWet(${dryWetRef.current}); true;`,
     );
+    webView.injectJavaScript(
+      `window.setMasterVolume(${masterVolumeRef.current}); true;`,
+    );
   }, []);
 
   const setOscFrequency = useCallback(
@@ -112,6 +124,14 @@ export default function AudioEngineProvider({
     (hz: number) => {
       lfoRateRef.current = hz;
       inject(`window.setLfoRate(${hz}); true;`);
+    },
+    [inject],
+  );
+
+  const setOscVolume = useCallback(
+    (percent: number) => {
+      oscVolumeRef.current = percent;
+      inject(`window.setOscVolume(${percent}); true;`);
     },
     [inject],
   );
@@ -166,26 +186,38 @@ export default function AudioEngineProvider({
     [inject],
   );
 
+  const setMasterVolume = useCallback(
+    (percent: number) => {
+      masterVolumeRef.current = percent;
+      inject(`window.setMasterVolume(${percent}); true;`);
+    },
+    [inject],
+  );
+
   const value = useMemo(
     () => ({
       setOscFrequency,
       setLfoRate,
+      setOscVolume,
       setReverbGain,
       setReverbPhase,
       setReverbFrequency,
       setReverbResonance,
       setReverbDelay,
       setDryWet,
+      setMasterVolume,
     }),
     [
       setOscFrequency,
       setLfoRate,
+      setOscVolume,
       setReverbGain,
       setReverbPhase,
       setReverbFrequency,
       setReverbResonance,
       setReverbDelay,
       setDryWet,
+      setMasterVolume,
     ],
   );
 

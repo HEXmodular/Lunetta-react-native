@@ -1,4 +1,6 @@
+import { createOscillatorControlsScript } from "@/audio/oscillatorControlsHtml";
 import { createOscillatorScript } from "@/audio/oscillatorHtml";
+import { createReverbControlsScript } from "@/audio/reverbControlsHtml";
 
 function createReverbScript(defaultFreq: number) {
   return `
@@ -63,6 +65,7 @@ function createReverbScript(defaultFreq: number) {
       const chainInverted = [false, false];
       const dryGain = audioCtx.createGain();
       const wetGain = audioCtx.createGain();
+      const masterGain = audioCtx.createGain();
       const leftKeep = audioCtx.createGain();
       const leftCross = audioCtx.createGain();
       const rightKeep = audioCtx.createGain();
@@ -71,13 +74,14 @@ function createReverbScript(defaultFreq: number) {
 
       dryGain.gain.value = 0.5;
       wetGain.gain.value = 0.5;
+      masterGain.gain.value = 1;
       leftKeep.gain.value = 0.75;
       leftCross.gain.value = 0.25;
       rightKeep.gain.value = 0.75;
       rightCross.gain.value = 0.25;
 
       outputGain.connect(dryGain);
-      dryGain.connect(audioCtx.destination);
+      dryGain.connect(masterGain);
       outputGain.connect(chains[0].gain);
       outputGain.connect(chains[1].gain);
 
@@ -90,7 +94,8 @@ function createReverbScript(defaultFreq: number) {
       rightKeep.connect(stereoMerger, 0, 1);
       leftCross.connect(stereoMerger, 0, 1);
       stereoMerger.connect(wetGain);
-      wetGain.connect(audioCtx.destination);
+      wetGain.connect(masterGain);
+      masterGain.connect(audioCtx.destination);
 
       function applyChainGain(index) {
         var linear = dbToGain(chainGainDb[index]);
@@ -98,50 +103,6 @@ function createReverbScript(defaultFreq: number) {
         chains[index].gain.gain.setValueAtTime(linear, audioCtx.currentTime);
         chains[index].delayGain.gain.setValueAtTime(linear, audioCtx.currentTime);
       }
-
-      window.setReverbGain = function (index, db) {
-        chainGainDb[index] = db;
-        applyChainGain(index);
-        audioCtx.resume();
-      };
-
-      window.setReverbPhase = function (index, inverted) {
-        chainInverted[index] = !!inverted;
-        applyChainGain(index);
-        audioCtx.resume();
-      };
-
-      window.setReverbFrequency = function (index, hz) {
-        chains[index].filter.frequency.setValueAtTime(
-          hz,
-          audioCtx.currentTime,
-        );
-        audioCtx.resume();
-      };
-
-      window.setReverbResonance = function (index, percent) {
-        chains[index].filter.Q.setValueAtTime(
-          resonanceToQ(percent),
-          audioCtx.currentTime,
-        );
-        audioCtx.resume();
-      };
-
-      window.setReverbDelay = function (index, ms) {
-        var seconds = Math.max(0, Math.min(MAX_DELAY, ms / 1000));
-        chains[index].delay.delayTime.linearRampToValueAtTime(
-          seconds,
-          audioCtx.currentTime+0.5,
-        );
-        audioCtx.resume();
-      };
-
-      window.setDryWet = function (percent) {
-        var wet = Math.max(0, Math.min(100, percent)) / 100;
-        dryGain.gain.setValueAtTime(1 - wet, audioCtx.currentTime);
-        wetGain.gain.setValueAtTime(wet, audioCtx.currentTime);
-        audioCtx.resume();
-      };
 `;
 }
 
@@ -154,7 +115,9 @@ export function createEngineHtml(defaultFreq: number, defaultLfoRate = 1) {
   <body>
     <script>
       ${createOscillatorScript(defaultFreq, defaultLfoRate)}
+      ${createOscillatorControlsScript()}
       ${createReverbScript(defaultFreq)}
+      ${createReverbControlsScript()}
     </script>
   </body>
 </html>`;

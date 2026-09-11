@@ -3,6 +3,7 @@ import LfoWidget from "@/widgets/LfoWidget";
 import OscillatorWidget, {
   semitonesToHz,
 } from "@/widgets/OscillatorWidget";
+import VolumeWidget from "@/widgets/VolumeWidget";
 import { View } from "react-native";
 
 export default function Index() {
@@ -39,10 +40,15 @@ export default function Index() {
             }}
           />
         </View>
-        <View className="w-1/2 self-center">
+        <View className="w-full flex-row items-start gap-3">
           <LfoWidget
             onChange={(hz) => {
               audio.setLfoRate(hz);
+            }}
+          />
+          <VolumeWidget
+            onChange={(percent) => {
+              audio.setOscVolume(percent);
             }}
           />
         </View>

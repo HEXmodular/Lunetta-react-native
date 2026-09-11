@@ -14,7 +14,7 @@ export default function LfoWidget({ onChange }: LfoWidgetProps) {
   const [rate, setRate] = useState(DEFAULT_RATE);
 
   return (
-    <View className="w-full items-center rounded-2xl border border-border px-2 py-3">
+    <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
       <Text className="mb-1 font-sans-semibold text-sm text-primary">LFO</Text>
       <CircularSlider
         size={140}
