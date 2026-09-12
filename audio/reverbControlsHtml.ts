@@ -17,6 +17,10 @@ export function createReverbControlsScript() {
           hz,
           audioCtx.currentTime,
         );
+        chains[index].delayFilter.frequency.setValueAtTime(
+          hz,
+          audioCtx.currentTime,
+        );
         audioCtx.resume();
       };
 

@@ -28,6 +28,7 @@ function createReverbScript(defaultFreq: number) {
         var clipper = createHardClipper();
         var delayGain = audioCtx.createGain();
         var delay = audioCtx.createDelay(MAX_DELAY);
+        var delayFilter = audioCtx.createBiquadFilter();
         var delayClipper = createHardClipper();
         gain.channelCount = 1;
         gain.channelCountMode = "explicit";
@@ -37,9 +38,14 @@ function createReverbScript(defaultFreq: number) {
         delayGain.channelCountMode = "explicit";
         delay.channelCount = 1;
         delay.channelCountMode = "explicit";
+        delayFilter.channelCount = 1;
+        delayFilter.channelCountMode = "explicit";
         filter.type = "lowpass";
         filter.frequency.value = ${defaultFreq};
         filter.Q.value = 0.707;
+        delayFilter.type = "lowpass";
+        delayFilter.frequency.value = ${defaultFreq};
+        delayFilter.Q.value = 0.707;
         gain.gain.value = 1;
         delayGain.gain.value = 1;
         delay.delayTime.value = 0;
@@ -48,14 +54,16 @@ function createReverbScript(defaultFreq: number) {
         clipper.connect(gain);
         clipper.connect(delayGain);
         delayGain.connect(delay);
-        delay.connect(delayClipper);
-        delayClipper.connect(delay);
+        delay.connect(delayFilter);
+        delayFilter.connect(delayClipper);
+        delayClipper.connect(delayGain);
         return {
           gain: gain,
           filter: filter,
           clipper: clipper,
           delayGain: delayGain,
           delay: delay,
+          delayFilter: delayFilter,
           delayClipper: delayClipper,
         };
       }
