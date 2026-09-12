@@ -13,7 +13,7 @@ export default function Reverb2Screen() {
         <ReverbWidget chainIndex={1} />
         <View className="w-full flex-row items-start gap-3">
           <DryWetWidget onChange={audio.setDryWet} />
-          <VolumeWidget onChange={audio.setMasterVolume} />
+          <VolumeWidget label="Master" onChange={audio.setMasterVolume} />
         </View>
       </View>
     </View>

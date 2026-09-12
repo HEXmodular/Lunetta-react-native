@@ -7,16 +7,20 @@ const SLIDER_MAX = 100;
 const DEFAULT_VOLUME = 100;
 
 type VolumeWidgetProps = {
+  label?: string;
   onChange?: (percent: number) => void;
 };
 
-export default function VolumeWidget({ onChange }: VolumeWidgetProps) {
+export default function VolumeWidget({
+  label = "Volume",
+  onChange,
+}: VolumeWidgetProps) {
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
       <Text className="mb-1 font-sans-semibold text-sm text-primary">
-        Volume
+        {label}
       </Text>
       <CircularSlider
         size={140}
@@ -27,7 +31,7 @@ export default function VolumeWidget({ onChange }: VolumeWidgetProps) {
           setVolume(nextVolume);
           onChange?.(nextVolume);
         }}
-        label="Volume"
+        label={label}
         unit="%"
         formatValue={(value) => String(Math.round(value))}
       />
