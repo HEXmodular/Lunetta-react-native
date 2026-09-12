@@ -8,7 +8,7 @@ export default function Reverb2Screen() {
   const audio = useAudioEngine();
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-4">
+    <View className="flex-1 items-center justify-center bg-background px-4">
       <View className="w-full gap-3">
         <ReverbWidget chainIndex={1} />
         <View className="w-full flex-row items-start gap-3">

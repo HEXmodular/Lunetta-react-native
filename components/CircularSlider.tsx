@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { scheduleOnRN } from "react-native-worklets";
 import Svg, { Circle, Path } from "react-native-svg";
+import { scheduleOnRN } from "react-native-worklets";
 
 const DEFAULT_SIZE = 280;
 const START_ANGLE = 135;

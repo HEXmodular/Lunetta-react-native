@@ -11,15 +11,15 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: "#ea7a53",
-          tabBarInactiveTintColor: "#081126",
+          tabBarInactiveTintColor: "rgba(244, 246, 250, 0.45)",
           tabBarButton: TabBarButton,
           tabBarLabelStyle: {
             fontSize: 10,
             fontWeight: "600",
           },
           tabBarStyle: {
-            backgroundColor: "#ffffff",
-            borderTopColor: "rgba(0, 0, 0, 0.1)",
+            backgroundColor: "#081126",
+            borderTopColor: "rgba(255, 255, 255, 0.12)",
           },
         }}
       >

@@ -33,7 +33,7 @@ export default function PhaseInvertToggle({ onChange }: PhaseInvertToggleProps) 
       accessibilityLabel="Invert phase"
       accessibilityState={{ selected: inverted }}
       className={`h-14 w-14 items-center justify-center rounded-full border ${
-        inverted ? "border-accent bg-accent" : "border-border bg-white"
+        inverted ? "border-accent bg-accent" : "border-border bg-background"
       }`}
     >
       <Animated.View style={animatedStyle}>

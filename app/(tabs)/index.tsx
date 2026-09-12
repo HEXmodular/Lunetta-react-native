@@ -10,7 +10,7 @@ export default function Index() {
   const audio = useAudioEngine();
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-4">
+    <View className="flex-1 items-center justify-center bg-background px-4">
       <View className="w-full gap-3">
         <View className="w-full flex-row items-start gap-3">
           <OscillatorWidget

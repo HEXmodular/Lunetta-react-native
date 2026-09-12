@@ -5,9 +5,10 @@
 @import "nativewind/theme";
 
 @theme {
-    --color-primary: #081126;
+    --color-background: #081126;
+    --color-primary: #f4f6fa;
     --color-accent: #ea7a53;
-    --color-border: rgba(0, 0, 0, 0.1);
+    --color-border: rgba(255, 255, 255, 0.12);
     --color-success: #16a34a;
     --color-destructive: #dc2626;
 
