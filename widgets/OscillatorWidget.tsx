@@ -1,6 +1,6 @@
 import CircularSlider from "@/components/CircularSlider";
 import ValueSelector from "@/components/ValueSelector";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const A4_HZ = 440;
@@ -51,27 +51,79 @@ function nextDisplayMode(mode: DisplayMode): DisplayMode {
   return DISPLAY_CYCLE[(DISPLAY_CYCLE.indexOf(mode) + 1) % DISPLAY_CYCLE.length];
 }
 
+function splitSemitones(semitones: number): {
+  tune: number;
+  offsetIndex: number;
+} {
+  let best = {
+    tune: semitones,
+    offsetIndex: OFFSET_OCTAVES.indexOf(0),
+    distance: Number.POSITIVE_INFINITY,
+  };
+
+  for (let index = 0; index < OFFSET_OCTAVES.length; index += 1) {
+    const octave = OFFSET_OCTAVES[index] ?? 0;
+    const tune = semitones - octave * 12;
+    if (tune < SLIDER_MIN || tune > SLIDER_MAX) {
+      continue;
+    }
+    const distance = Math.abs(tune);
+    if (distance < best.distance) {
+      best = { tune, offsetIndex: index, distance };
+    }
+  }
+
+  if (best.distance === Number.POSITIVE_INFINITY) {
+    const clamped = Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, semitones));
+    return { tune: clamped, offsetIndex: OFFSET_OCTAVES.indexOf(0) };
+  }
+
+  return { tune: best.tune, offsetIndex: best.offsetIndex };
+}
+
 type OscillatorWidgetProps = {
   title?: string;
+  /** Total semitones from A4. When set, the widget stays in sync with external edits. */
+  value?: number;
   onChange?: (semitones: number) => void;
   showValueSelector?: boolean;
 };
 
 export default function OscillatorWidget({
   title = "Oscillator",
+  value,
   onChange,
   showValueSelector = true,
 }: OscillatorWidgetProps) {
-  const [tune, setTune] = useState(0);
-  const [offsetIndex, setOffsetIndex] = useState(OFFSET_OCTAVES.indexOf(0));
+  const [tune, setTune] = useState(() =>
+    value == null ? 0 : splitSemitones(value).tune,
+  );
+  const [offsetIndex, setOffsetIndex] = useState(() =>
+    value == null
+      ? OFFSET_OCTAVES.indexOf(0)
+      : splitSemitones(value).offsetIndex,
+  );
   const [displayMode, setDisplayMode] = useState<DisplayMode>("st");
   const offset = (OFFSET_OCTAVES[offsetIndex] ?? 0) * 12;
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    const current = tune + (OFFSET_OCTAVES[offsetIndex] ?? 0) * 12;
+    if (Math.abs(current - value) < 0.0001) {
+      return;
+    }
+    const next = splitSemitones(value);
+    setTune(next.tune);
+    setOffsetIndex(next.offsetIndex);
+  }, [value, tune, offsetIndex]);
 
   const emit = (nextTune: number, nextOffset: number) => {
     onChange?.(nextTune + nextOffset);
   };
 
-  const semitones = tune + offset;
+  const semitones = value ?? tune + offset;
   const hz = semitonesToHz(semitones);
   const display =
     displayMode === "hz"
