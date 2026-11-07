@@ -90,13 +90,7 @@ export default function Keyboard({
   }, [rowOffset, visibleOffset]);
 
   useEffect(() => {
-    if (!expanded) {
-      setSelectedVoice(mode === "hold" && voiceMidis.length > 0 ? 0 : null);
-      return;
-    }
-    if (mode === "hold" && voiceMidis.length > 0) {
-      setSelectedVoice(0);
-    }
+    setSelectedVoice(mode === "hold" && voiceMidis.length > 0 ? 0 : null);
   }, [expanded, mode, voiceMidis.length]);
 
   const handleGridTap = useCallback(
