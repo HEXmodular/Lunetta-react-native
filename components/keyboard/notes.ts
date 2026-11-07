@@ -1,6 +1,9 @@
 /** Default visible string rows; overridable via settings. */
 export const KEYBOARD_ROW_COUNT = 8;
 
+/** Visible note columns; kept fixed so all keyboard entry points match. */
+export const KEYBOARD_COLUMN_COUNT = 5;
+
 /** Semitones from a cell to the cell on its right. */
 export const COLUMN_SEMITONES = 1;
 
@@ -12,8 +15,10 @@ export const KEY_GAP = 3;
 /** Bottom-left cell at row offset 0. MIDI 48 is C3. */
 export const HOME_MIDI = 48;
 
-export const LOWEST_MIDI = 24;
-export const HIGHEST_MIDI = 96;
+/** A0 — bottom of an 88-key piano. */
+export const LOWEST_MIDI = 21;
+/** A7 — top of an 88-key piano. */
+export const HIGHEST_MIDI = 105;
 
 const NOTE_NAMES = [
   "C",
@@ -93,9 +98,11 @@ export function rowOffsetLimits(
 ): { min: number; max: number } {
   const columns = Math.max(1, columnCount);
   const rows = Math.max(1, Math.floor(rowCount));
-  const min = Math.ceil((LOWEST_MIDI - HOME_MIDI) / ROW_SEMITONES);
+  // Floor/ceil so A0 and A7 are reachable even when they are not a corner cell
+  // on the fourths × semitone grid.
+  const min = Math.floor((LOWEST_MIDI - HOME_MIDI) / ROW_SEMITONES);
   const max =
-    Math.floor(
+    Math.ceil(
       (HIGHEST_MIDI - HOME_MIDI - (columns - 1) * COLUMN_SEMITONES) /
         ROW_SEMITONES,
     ) - (rows - 1);

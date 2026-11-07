@@ -44,6 +44,7 @@ export default function ReverbWidget({ chainIndex }: ReverbWidgetProps) {
               }
             />
             <OscillatorWidget
+              id={isFirst ? "reverb1Freq" : "reverb2Freq"}
               title="Frequency"
               value={freq}
               showValueSelector={false}

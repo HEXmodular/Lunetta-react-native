@@ -27,6 +27,9 @@ const DISPLAY_CYCLE = ["st", "hz", "note"] as const;
 
 type DisplayMode = (typeof DISPLAY_CYCLE)[number];
 
+/** Survives remounts (e.g. keyboard takeover) so note/Hz mode is not reset to st. */
+const displayModes = new Map<string, DisplayMode>();
+
 export function semitonesToHz(semitones: number) {
   return A4_HZ * 2 ** (semitones / 12);
 }
@@ -84,6 +87,8 @@ function splitSemitones(semitones: number): {
 
 type OscillatorWidgetProps = {
   title?: string;
+  /** Stable key for remembering display mode across remounts. Defaults to title. */
+  id?: string;
   /** Total semitones from A4. When set, the widget stays in sync with external edits. */
   value?: number;
   onChange?: (semitones: number) => void;
@@ -93,11 +98,13 @@ type OscillatorWidgetProps = {
 
 export default function OscillatorWidget({
   title = "Oscillator",
+  id,
   value,
   onChange,
   showValueSelector = true,
   onKeyboardPress,
 }: OscillatorWidgetProps) {
+  const modeKey = id ?? title;
   const [tune, setTune] = useState(() =>
     value == null ? 0 : splitSemitones(value).tune,
   );
@@ -106,8 +113,18 @@ export default function OscillatorWidget({
       ? OFFSET_OCTAVES.indexOf(0)
       : splitSemitones(value).offsetIndex,
   );
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("st");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(
+    () => displayModes.get(modeKey) ?? "st",
+  );
   const offset = (OFFSET_OCTAVES[offsetIndex] ?? 0) * 12;
+
+  const cycleDisplayMode = () => {
+    setDisplayMode((current) => {
+      const next = nextDisplayMode(current);
+      displayModes.set(modeKey, next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (value == null) {
@@ -164,7 +181,7 @@ export default function OscillatorWidget({
           setTune(nextTune);
           emit(nextTune, offset);
         }}
-        onPress={() => setDisplayMode(nextDisplayMode)}
+        onPress={cycleDisplayMode}
         onLongPress={
           displayMode === "st"
             ? () => {

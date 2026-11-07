@@ -5,6 +5,7 @@ import {
   cellMidi,
   describeNote,
   KEY_GAP,
+  KEYBOARD_COLUMN_COUNT,
   KEYBOARD_ROW_COUNT,
   midiOctave,
   rowOffsetLimits,
@@ -23,6 +24,7 @@ import {
   GestureDetector,
 } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type { KeyboardNote };
 
@@ -61,6 +63,7 @@ export default function Keyboard({
   onExpandedChange,
   mode = "assign",
 }: KeyboardProps) {
+  const insets = useSafeAreaInsets();
   const [stage, setStage] = useState<StageSize>({ width: 0, height: 0 });
   const [rowOffset, setRowOffset] = useState(0);
   const [selectedVoice, setSelectedVoice] = useState<number | null>(() =>
@@ -72,13 +75,14 @@ export default function Keyboard({
     Number.isFinite(rowCount) && rowCount >= 1
       ? Math.floor(rowCount)
       : KEYBOARD_ROW_COUNT;
-  const cellSize =
-    stage.height > 0
-      ? (stage.height - KEY_GAP * (safeRowCount - 1)) / safeRowCount
-      : 0;
   const columns =
-    cellSize > 0
-      ? Math.max(0, Math.floor((stage.width + KEY_GAP) / (cellSize + KEY_GAP)))
+    stage.width > 0 && stage.height > 0 ? KEYBOARD_COLUMN_COUNT : 0;
+  const cellSize =
+    columns > 0
+      ? Math.min(
+          (stage.height - KEY_GAP * (safeRowCount - 1)) / safeRowCount,
+          (stage.width - KEY_GAP * (columns - 1)) / columns,
+        )
       : 0;
   const limits = rowOffsetLimits(Math.max(columns, 1), safeRowCount);
   const visibleOffset = Math.min(limits.max, Math.max(limits.min, rowOffset));
@@ -180,7 +184,15 @@ export default function Keyboard({
   }
 
   return (
-    <View className="min-h-0 w-full flex-1">
+    <View
+      className="min-h-0 w-full flex-1"
+      style={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}
+    >
       <View className="px-2 pb-2">
         <FoldButton expanded onPress={toggleExpanded} />
       </View>
