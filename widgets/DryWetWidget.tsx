@@ -1,5 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const SLIDER_MIN = 0;
@@ -7,11 +7,19 @@ const SLIDER_MAX = 100;
 const DEFAULT_MIX = 50;
 
 type DryWetWidgetProps = {
+  value?: number;
   onChange?: (percent: number) => void;
 };
 
-export default function DryWetWidget({ onChange }: DryWetWidgetProps) {
-  const [mix, setMix] = useState(DEFAULT_MIX);
+export default function DryWetWidget({ value, onChange }: DryWetWidgetProps) {
+  const [mix, setMix] = useState(value ?? DEFAULT_MIX);
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    setMix(value);
+  }, [value]);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
@@ -29,7 +37,7 @@ export default function DryWetWidget({ onChange }: DryWetWidgetProps) {
         }}
         label="Mix"
         unit="%"
-        formatValue={(value) => String(Math.round(value))}
+        formatValue={(next) => String(Math.round(next))}
       />
     </View>
   );

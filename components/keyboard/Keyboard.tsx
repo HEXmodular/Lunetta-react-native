@@ -34,6 +34,11 @@ type KeyboardProps = {
   rowCount?: number;
   expanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
+  /**
+   * `assign` — tap a voice, then tap a note to move it.
+   * `hold` — first voice stays selected; any note tap moves it immediately.
+   */
+  mode?: "assign" | "hold";
 };
 
 type StageSize = {
@@ -54,10 +59,14 @@ export default function Keyboard({
   rowCount = KEYBOARD_ROW_COUNT,
   expanded,
   onExpandedChange,
+  mode = "assign",
 }: KeyboardProps) {
   const [stage, setStage] = useState<StageSize>({ width: 0, height: 0 });
   const [rowOffset, setRowOffset] = useState(0);
-  const [selectedVoice, setSelectedVoice] = useState<number | null>(null);
+  const [selectedVoice, setSelectedVoice] = useState<number | null>(() =>
+    mode === "hold" && voiceMidis.length > 0 ? 0 : null,
+  );
+  const showVoiceLabels = mode !== "hold" && voiceMidis.length > 1;
 
   const safeRowCount =
     Number.isFinite(rowCount) && rowCount >= 1
@@ -82,9 +91,13 @@ export default function Keyboard({
 
   useEffect(() => {
     if (!expanded) {
-      setSelectedVoice(null);
+      setSelectedVoice(mode === "hold" && voiceMidis.length > 0 ? 0 : null);
+      return;
     }
-  }, [expanded]);
+    if (mode === "hold" && voiceMidis.length > 0) {
+      setSelectedVoice(0);
+    }
+  }, [expanded, mode, voiceMidis.length]);
 
   const handleGridTap = useCallback(
     (x: number, y: number) => {
@@ -95,6 +108,15 @@ export default function Keyboard({
 
       const midi = cellMidi(visibleOffset, cell.row, cell.column, safeRowCount);
       const onNote = voicesOnNote(voiceMidis, midi);
+
+      if (mode === "hold") {
+        const voice = selectedVoice ?? 0;
+        if (voiceMidis[voice] !== midi) {
+          onVoiceMidiChange(voice, midi);
+        }
+        setSelectedVoice(voice);
+        return;
+      }
 
       if (selectedVoice == null) {
         if (onNote.length > 0) {
@@ -114,6 +136,7 @@ export default function Keyboard({
     [
       cellSize,
       columns,
+      mode,
       onVoiceMidiChange,
       safeRowCount,
       selectedVoice,
@@ -265,7 +288,7 @@ export default function Keyboard({
                               {midiOctave(note.midi)}
                             </Text>
                           ) : null}
-                          {hasVoice ? (
+                          {hasVoice && showVoiceLabels ? (
                             <View
                               className="absolute left-0 right-0 top-0 flex-row flex-wrap items-start justify-center"
                               style={{

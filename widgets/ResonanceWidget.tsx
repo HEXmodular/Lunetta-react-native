@@ -1,5 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const SLIDER_MIN = 0;
@@ -7,11 +7,22 @@ const SLIDER_MAX = 100;
 const DEFAULT_RESONANCE = 0;
 
 type ResonanceWidgetProps = {
+  value?: number;
   onChange?: (percent: number) => void;
 };
 
-export default function ResonanceWidget({ onChange }: ResonanceWidgetProps) {
-  const [resonance, setResonance] = useState(DEFAULT_RESONANCE);
+export default function ResonanceWidget({
+  value,
+  onChange,
+}: ResonanceWidgetProps) {
+  const [resonance, setResonance] = useState(value ?? DEFAULT_RESONANCE);
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    setResonance(value);
+  }, [value]);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
@@ -29,7 +40,7 @@ export default function ResonanceWidget({ onChange }: ResonanceWidgetProps) {
         }}
         label="Resonance"
         unit="%"
-        formatValue={(value) => String(Math.round(value))}
+        formatValue={(next) => String(Math.round(next))}
       />
     </View>
   );

@@ -1,5 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const SLIDER_MIN = 0;
@@ -16,11 +16,19 @@ function formatDelay(ms: number) {
 }
 
 type DelayWidgetProps = {
+  value?: number;
   onChange?: (ms: number) => void;
 };
 
-export default function DelayWidget({ onChange }: DelayWidgetProps) {
-  const [delayMs, setDelayMs] = useState(DEFAULT_DELAY_MS);
+export default function DelayWidget({ value, onChange }: DelayWidgetProps) {
+  const [delayMs, setDelayMs] = useState(value ?? DEFAULT_DELAY_MS);
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    setDelayMs(value);
+  }, [value]);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">

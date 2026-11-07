@@ -1,5 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const SLIDER_MIN = 0;
@@ -8,14 +8,23 @@ const DEFAULT_VOLUME = 100;
 
 type VolumeWidgetProps = {
   label?: string;
+  value?: number;
   onChange?: (percent: number) => void;
 };
 
 export default function VolumeWidget({
   label = "Volume",
+  value,
   onChange,
 }: VolumeWidgetProps) {
-  const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [volume, setVolume] = useState(value ?? DEFAULT_VOLUME);
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    setVolume(value);
+  }, [value]);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
@@ -33,7 +42,7 @@ export default function VolumeWidget({
         }}
         label={label}
         unit="%"
-        formatValue={(value) => String(Math.round(value))}
+        formatValue={(next) => String(Math.round(next))}
       />
     </View>
   );

@@ -1,5 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 const SLIDER_MIN = -100;
@@ -16,11 +16,19 @@ function formatDb(value: number) {
 }
 
 type GainWidgetProps = {
+  value?: number;
   onChange?: (db: number) => void;
 };
 
-export default function GainWidget({ onChange }: GainWidgetProps) {
-  const [gain, setGain] = useState(DEFAULT_GAIN);
+export default function GainWidget({ value, onChange }: GainWidgetProps) {
+  const [gain, setGain] = useState(value ?? DEFAULT_GAIN);
+
+  useEffect(() => {
+    if (value == null) {
+      return;
+    }
+    setGain(value);
+  }, [value]);
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">

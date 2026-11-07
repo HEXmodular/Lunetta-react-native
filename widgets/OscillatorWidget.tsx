@@ -1,4 +1,5 @@
 import CircularSlider from "@/components/CircularSlider";
+import FrequencyKeyboardButton from "@/components/keyboard/FrequencyKeyboardButton";
 import ValueSelector from "@/components/ValueSelector";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
@@ -87,6 +88,7 @@ type OscillatorWidgetProps = {
   value?: number;
   onChange?: (semitones: number) => void;
   showValueSelector?: boolean;
+  onKeyboardPress?: () => void;
 };
 
 export default function OscillatorWidget({
@@ -94,6 +96,7 @@ export default function OscillatorWidget({
   value,
   onChange,
   showValueSelector = true,
+  onKeyboardPress,
 }: OscillatorWidgetProps) {
   const [tune, setTune] = useState(() =>
     value == null ? 0 : splitSemitones(value).tune,
@@ -146,9 +149,12 @@ export default function OscillatorWidget({
 
   return (
     <View className="min-w-0 flex-1 items-center rounded-2xl border border-border px-2 py-3">
-      <Text className="mb-1 font-sans-semibold text-sm text-primary">
-        {title}
-      </Text>
+      <View className="mb-1 flex-row items-center justify-center gap-1.5">
+        <Text className="font-sans-semibold text-sm text-primary">{title}</Text>
+        {onKeyboardPress ? (
+          <FrequencyKeyboardButton onPress={onKeyboardPress} />
+        ) : null}
+      </View>
       <CircularSlider
         size={140}
         min={SLIDER_MIN}
