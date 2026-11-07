@@ -11,6 +11,7 @@ import OscillatorWidget from "@/widgets/OscillatorWidget";
 import ResonanceWidget from "@/widgets/ResonanceWidget";
 import { useState } from "react";
 import { Modal, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 type ReverbWidgetProps = {
   chainIndex: number;
@@ -92,21 +93,23 @@ export default function ReverbWidget({ chainIndex }: ReverbWidgetProps) {
         presentationStyle="fullScreen"
         onRequestClose={() => setKeyboardExpanded(false)}
       >
-        <View className="flex-1 bg-background px-2 pb-2 pt-2">
-          <Keyboard
-            expanded
-            mode="hold"
-            rowCount={values.keyboardRows}
-            onExpandedChange={setKeyboardExpanded}
-            voiceMidis={[semitonesToMidi(freq)]}
-            onVoiceMidiChange={(_voiceIndex, midi) => {
-              setParam(
-                isFirst ? "reverb1Freq" : "reverb2Freq",
-                midiToSemitones(midi),
-              );
-            }}
-          />
-        </View>
+        <GestureHandlerRootView style={{ flex: 1 }} className="flex-1 bg-background">
+          <View className="flex-1 bg-background px-2 pb-2 pt-2">
+            <Keyboard
+              expanded
+              mode="hold"
+              rowCount={values.keyboardRows}
+              onExpandedChange={setKeyboardExpanded}
+              voiceMidis={[semitonesToMidi(freq)]}
+              onVoiceMidiChange={(_voiceIndex, midi) => {
+                setParam(
+                  isFirst ? "reverb1Freq" : "reverb2Freq",
+                  midiToSemitones(midi),
+                );
+              }}
+            />
+          </View>
+        </GestureHandlerRootView>
       </Modal>
     </>
   );

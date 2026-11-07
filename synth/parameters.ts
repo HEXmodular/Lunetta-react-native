@@ -1,6 +1,6 @@
-export const KEYBOARD_ROWS_MIN = 1;
-export const KEYBOARD_ROWS_MAX = 8;
-export const KEYBOARD_ROWS_DEFAULT = 4;
+export const KEYBOARD_ROWS_MIN = 8;
+export const KEYBOARD_ROWS_MAX = 16;
+export const KEYBOARD_ROWS_DEFAULT = 8;
 
 export const OSC_SEMITONES_MIN = -72;
 export const OSC_SEMITONES_MAX = 72;

@@ -120,12 +120,13 @@ export default function Keyboard({
       }
 
       if (voiceMidis[selectedVoice] === midi) {
-        const nextOnNote = onNote.filter((index) => index !== selectedVoice);
-        setSelectedVoice(nextOnNote.length > 0 ? nextOnNote[0] : null);
+        // Tap on the selected voice's own note cancels the transfer.
+        setSelectedVoice(null);
         return;
       }
 
       onVoiceMidiChange(selectedVoice, midi);
+      setSelectedVoice(null);
     },
     [
       cellSize,

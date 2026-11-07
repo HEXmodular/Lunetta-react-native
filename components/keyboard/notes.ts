@@ -1,5 +1,5 @@
 /** Default visible string rows; overridable via settings. */
-export const KEYBOARD_ROW_COUNT = 4;
+export const KEYBOARD_ROW_COUNT = 8;
 
 /** Semitones from a cell to the cell on its right. */
 export const COLUMN_SEMITONES = 1;
